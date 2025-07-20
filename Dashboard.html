@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Secret Coders</title>
+  <!-- ✅ Use Tailwind v3 CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Enable dark mode via class
+    tailwind.config = {
+      darkMode: 'class'
+    };
+  </script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-all">
+
+  <!-- Header -->
+  <header class="bg-white dark:bg-gray-800 shadow p-4 flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-blue-600 dark:text-white">🎓 Secret Coders</h1>
+    <div class="flex items-center gap-4">
+
+      <!-- User Profile Info -->
+      <div class="flex items-center gap-2">
+        <img src="https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff" class="w-8 h-8 rounded-full" />
+        <div class="text-sm">
+          <p class="text-gray-700 dark:text-gray-300 font-medium">User</p>
+          <button onclick="logout()" class="text-red-500 hover:underline text-xs">Logout</button>
+        </div>
+      </div>
+
+      <!-- Notifications -->
+      <div class="relative">
+        <button onclick="toggleNotifications()" class="relative p-2 rounded-full bg-gray-200 dark:bg-gray-700">
+          <span id="notifBell">🔔</span>
+          <span class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">1</span>
+        </button>
+        <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 z-50">
+          <h3 class="text-sm font-semibold text-gray-800 dark:text-white mb-2">📢 Notifications</h3>
+          <ul id="notifList" class="text-sm text-gray-600 dark:text-gray-300"></ul>
+        </div>
+      </div>
+
+      <!-- Dark Mode Toggle -->
+      <button onclick="toggleDarkMode()" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700">
+        <span id="darkIcon">🌙</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Notifications Banner -->
+  <section class="max-w-6xl mx-auto mt-4 px-4">
+    <div class="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded">
+      🎉 New Course Added: <strong>“Mastering JavaScript ES6”</strong> – Check it out in the recommended section!
+    </div>
+  </section>
+
+  <!-- Profile Stats -->
+  <section class="max-w-6xl mx-auto mt-6 px-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
+      <h2 class="text-xl font-semibold mb-2">📈 Your Stats</h2>
+      <div id="profileStats" class="text-sm text-gray-600 dark:text-gray-300"></div>
+    </div>
+  </section>
+
+  <!-- Filter/Sort Controls -->
+  <section class="max-w-6xl mx-auto mt-6 px-4 flex gap-4">
+    <select id="filterSelect" class="p-2 border rounded bg-white dark:bg-gray-700 dark:text-white">
+      <option value="all">All</option>
+      <option value="incomplete">Incomplete</option>
+      <option value="complete">Completed</option>
+    </select>
+    <select id="sortSelect" class="p-2 border rounded bg-white dark:bg-gray-700 dark:text-white">
+      <option value="latest">Latest</option>
+      <option value="progress">By Progress</option>
+    </select>
+  </section>
+
+  <!-- My Courses -->
+  <main class="max-w-6xl mx-auto py-10 px-4">
+    <h2 class="text-2xl font-bold mb-6">📚 My Courses</h2>
+    <div id="courseProgressContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  </main>
+
+  <!-- Recommended Courses -->
+  <section class="max-w-6xl mx-auto px-4 mt-10">
+    <h2 class="text-2xl font-bold mb-4">🔥 Recommended Courses</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="recommendContainer"></div>
+  </section>
+
+  <!-- Scripts -->
+  <script>
+    const userId = 'USER_ID_HERE'; // Replace with actual user ID
+    let allData = [];
+
+    // Persistent Dark Mode
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.getElementById('darkIcon').textContent = '☀️';
+    }
+
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle('dark');
+      const isDark = document.documentElement.classList.contains('dark');
+      document.getElementById('darkIcon').textContent = isDark ? '☀️' : '🌙';
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+
+    function toggleNotifications() {
+      document.getElementById('notifDropdown').classList.toggle('hidden');
+    }
+
+    function logout() {
+      alert("Logging out...");
+      window.location.href = "/login";
+    }
+
+    function renderCourses(data) {
+      const container = document.getElementById('courseProgressContainer');
+      container.innerHTML = '';
+      data.forEach(item => {
+        const course = item.courseId;
+        const progress = item.completedPercentage || 0;
+        const lastLesson = item.lastAccessedLessonId?.title || 'N/A';
+
+        const card = document.createElement('div');
+        card.className = 'bg-white dark:bg-gray-800 rounded-xl shadow hover:shadow-lg transition p-5 flex flex-col justify-between';
+
+        card.innerHTML = `
+          <div>
+            <h3 class="text-xl font-semibold text-blue-700 dark:text-blue-400 mb-2">${course.title}</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mb-1">Progress: <strong>${progress}%</strong></p>
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-2">
+              <div class="bg-green-500 h-3 rounded-full transition-all duration-300" style="width: ${progress}%"></div>
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Last accessed: <span class="italic">${lastLesson}</span></p>
+          </div>
+          <a href="/course/${course._id}/lesson/${item.lastAccessedLessonId?._id || ''}" class="mt-4 text-center text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-medium transition">
+            Continue Course
+          </a>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Fetch user course progress
+    fetch(`/progress/user/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        allData = data;
+        renderCourses(allData);
+
+        const totalCourses = data.length;
+        const completedCourses = data.filter(c => c.completedPercentage === 100).length;
+        const totalLessonsWatched = data.reduce((sum, c) => sum + (c.completedPercentage / 10), 0);
+        document.getElementById('profileStats').innerHTML = `
+          <p>Total Courses Enrolled: <strong>${totalCourses}</strong></p>
+          <p>Courses Completed: <strong>${completedCourses}</strong></p>
+          <p>Lessons Watched (est): <strong>${Math.round(totalLessonsWatched)}</strong></p>
+        `;
+      });
+
+    // Filter & Sort
+    document.getElementById('filterSelect').addEventListener('change', (e) => {
+      const val = e.target.value;
+      let filtered = [...allData];
+      if (val === 'incomplete') filtered = filtered.filter(c => c.completedPercentage < 100);
+      if (val === 'complete') filtered = filtered.filter(c => c.completedPercentage === 100);
+      renderCourses(filtered);
+    });
+
+    document.getElementById('sortSelect').addEventListener('change', (e) => {
+      const val = e.target.value;
+      let sorted = [...allData];
+      if (val === 'progress') sorted.sort((a, b) => b.completedPercentage - a.completedPercentage);
+      renderCourses(sorted);
+    });
+
+    // Recommended Courses
+    const recommendations = [
+      { title: "Python for Beginners", link: "#" },
+      { title: "Full-Stack with Node.js", link: "#" },
+      { title: "Machine Learning Crash Course", link: "#" }
+    ];
+    const recContainer = document.getElementById('recommendContainer');
+    recommendations.forEach(course => {
+      recContainer.innerHTML += `
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+          <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">${course.title}</h3>
+          <a href="${course.link}" class="text-blue-600 hover:underline text-sm">View Course</a>
+        </div>
+      `;
+    });
+
+    // Notifications
+    const notifications = [
+      "🎉 New course 'Mastering JavaScript ES6' is live!",
+      "📢 AI course updated with new projects!",
+      "🚀 Your progress hit 80% in 'Node.js Bootcamp'"
+    ];
+    const notifList = document.getElementById('notifList');
+    notifications.forEach(note => {
+      const li = document.createElement('li');
+      li.className = "mb-1";
+      li.textContent = note;
+      notifList.appendChild(li);
+    });
+  </script>
+</body>
+</html>

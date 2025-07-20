@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Course Enrollment</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      .container {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 350px;
+      }
+      h2 {
+        text-align: center;
+        color: #333;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        color: #555;
+      }
+      input,
+      select,
+      button {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      button {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      #courseVideoContainer {
+        display: none;
+        margin-top: 20px;
+        text-align: center;
+      }
+      video {
+        width: 100%;
+        border-radius: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Course Enrollment Form</h2>
+      <form id="enrollmentForm">
+        <label for="name">Full Name:</label>
+        <input type="text" id="name" required />
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" required />
+
+        <label for="course">Select Course:</label>
+        <select id="course" required>
+          <option value="">Select a course</option>
+        </select>
+
+        <label for="payment">Payment Method:</label>
+        <select id="payment" required>
+          <option value="">Select Payment Method</option>
+          <option value="credit">Credit Card</option>
+          <option value="paypal">PayPal</option>
+          <option value="upi">UPI</option>
+          <option value="qr">QR Code</option>
+        </select>
+
+        <!-- Payment Credential Inputs -->
+        <div id="paymentDetails"></div>
+
+        <button type="submit">Enroll Now</button>
+      </form>
+
+      <div id="courseVideoContainer">
+        <h3>Course Video:</h3>
+        <video id="courseVideo" controls>
+          <source src="" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    </div>
+
+    <script>
+      const courses = [
+        {
+          code: "HTML101",
+          title: "HTML Course for Beginners",
+          videoUrl: "videos/HTML.webm",
+        },
+        {
+          code: "CSS102",
+          title: "Frontend Development-CSS",
+          videoUrl: "videos/CSS.webm",
+        },
+        {
+          code: "JS103",
+          title: "Introduction to Javascript",
+          videoUrl: "videos/JS.webm",
+        },
+        {
+          code: "PP104",
+          title: "Python Programming",
+          videoUrl: "videos/PYTHON.webm",
+        },
+        {
+          code: "SQL105",
+          title: "SQL for Data Science",
+          videoUrl: "videos/SQL.webm",
+        },
+        {
+          code: "CG106",
+          title: "ChatGPT for Beginners",
+          videoUrl: "videos/GPT.webm",
+        },
+        {
+          code: "AWS107",
+          title: "AWS for Beginners",
+          videoUrl: "videos/AWS.mp4",
+        },
+        {
+          code: "AZ108",
+          title: "Microsoft Azure Essentials",
+          videoUrl: "videos/AZURE.mp4",
+        },
+        {
+          code: "EX109",
+          title: "Introduction to MS Excel",
+          videoUrl: "videos/react.mp4",
+        },
+        {
+          code: "ST110",
+          title: "Statistics for Data Science",
+          videoUrl: "videos/react.mp4",
+        },
+        {
+          code: "JP111",
+          title: "Java Programming",
+          videoUrl: "videos/react.mp4",
+        },
+        {
+          code: "CB112",
+          title: "C for Beginners",
+          videoUrl: "videos/react.mp4",
+        },
+      ];
+
+      const courseSelect = document.getElementById("course");
+      const courseVideo = document.getElementById("courseVideo");
+      const courseVideoContainer = document.getElementById(
+        "courseVideoContainer"
+      );
+      const paymentSelect = document.getElementById("payment");
+      const paymentDetails = document.getElementById("paymentDetails");
+
+      document.addEventListener("DOMContentLoaded", () => {
+        courseSelect.innerHTML = `<option value="">Select a course</option>`;
+        courses.forEach((course) => {
+          const option = document.createElement("option");
+          option.value = course.code;
+          option.textContent = course.title;
+          courseSelect.appendChild(option);
+        });
+      });
+
+      paymentSelect.addEventListener("change", () => {
+        const method = paymentSelect.value;
+        paymentDetails.innerHTML = "";
+
+        if (method === "credit") {
+          paymentDetails.innerHTML = `
+            <label for="cardNumber">Card Number:</label>
+            <input type="text" id="cardNumber" required />
+            <label for="expiry">Expiry Date:</label>
+            <input type="month" id="expiry" required />
+            <label for="cvv">CVV:</label>
+            <input type="password" id="cvv" required />
+          `;
+        } else if (method === "paypal") {
+          paymentDetails.innerHTML = `
+            <label for="paypalEmail">PayPal Email:</label>
+            <input type="email" id="paypalEmail" required />
+          `;
+        } else if (method === "upi") {
+          paymentDetails.innerHTML = `
+            <label for="upiId">UPI ID:</label>
+            <input type="text" id="upiId" required />
+          `;
+        } else if (method === "qr") {
+          paymentDetails.innerHTML = `
+            <label for="qrRef">QR Reference Number:</label>
+            <input type="text" id="qrRef" required />
+          `;
+        }
+      });
+
+      document
+        .getElementById("enrollmentForm")
+        .addEventListener("submit", (event) => {
+          event.preventDefault();
+
+          const name = document.getElementById("name").value.trim();
+          const email = document.getElementById("email").value.trim();
+          const courseCode = courseSelect.value;
+          const paymentMethod = paymentSelect.value;
+
+          if (!name || !email || !courseCode || !paymentMethod) {
+            alert("All fields are required!");
+            return;
+          }
+
+          // Validate payment fields
+          let paymentValid = true;
+          let paymentDetailsData = {};
+
+          if (paymentMethod === "credit") {
+            const cardNumber = document.getElementById("cardNumber").value;
+            const expiry = document.getElementById("expiry").value;
+            const cvv = document.getElementById("cvv").value;
+            paymentValid = cardNumber && expiry && cvv;
+            paymentDetailsData = { cardNumber, expiry, cvv };
+          } else if (paymentMethod === "paypal") {
+            const paypalEmail = document.getElementById("paypalEmail").value;
+            paymentValid = paypalEmail;
+            paymentDetailsData = { paypalEmail };
+          } else if (paymentMethod === "upi") {
+            const upiId = document.getElementById("upiId").value;
+            paymentValid = upiId;
+            paymentDetailsData = { upiId };
+          } else if (paymentMethod === "qr") {
+            const qrRef = document.getElementById("qrRef").value;
+            paymentValid = qrRef;
+            paymentDetailsData = { qrRef };
+          }
+
+          if (!paymentValid) {
+            alert("Please fill in payment credentials.");
+            return;
+          }
+
+          const selectedCourse = courses.find(
+            (course) => course.code === courseCode
+          );
+          if (selectedCourse) {
+            // ✅ Send data to backend API
+            fetch("http://localhost:5000/api/enroll", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                name,
+                email,
+                courseCode,
+                courseTitle: selectedCourse.title,
+                paymentMethod,
+                paymentDetails: paymentDetailsData,
+              }),
+            })
+              .then((res) => res.json())
+              .then((data) => {
+                console.log("✅ Enrollment saved:", data.message || data);
+                alert(
+                  `✅ Successfully enrolled in ${
+                    selectedCourse.title
+                  } using ${paymentMethod.toUpperCase()}`
+                );
+                loadCourseVideo(selectedCourse.videoUrl);
+              })
+              .catch((err) => {
+                console.error("❌ Failed to save enrollment:", err);
+                alert("❌ Enrollment failed. Please try again later.");
+              });
+          }
+        });
+
+      function loadCourseVideo(videoUrl) {
+        if (videoUrl) {
+          courseVideo.src = videoUrl;
+          courseVideoContainer.style.display = "block";
+        } else {
+          alert("Video not available for this course.");
+        }
+      }
+    </script>
+  </body>
+</html>
